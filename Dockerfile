@@ -3,7 +3,7 @@ FROM php:8.2-fpm-alpine
 RUN apk update && \
     apk add --no-cache nginx
 
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/conf.d/default.conf
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
@@ -14,3 +14,4 @@ RUN chown -R www-data:www-data /var/www/html
 EXPOSE 8080
 
 CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+
