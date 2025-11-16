@@ -5,4 +5,4 @@ RUN rm -f /etc/nginx/conf.d/default.conf
 COPY . /var/www/html
 COPY nginx.conf /etc/nginx/conf.d/nginx.conf
 RUN chown -R www-data:www-data /var/www/html
-CMD sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/default.conf && php-fpm -D && nginx -g 'daemon off;'"
+CMD sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/nginx.conf > /etc/nginx/conf.d/default.conf && php-fpm -D && nginx -g 'daemon off;'"
