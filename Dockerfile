@@ -1,8 +1,8 @@
 FROM php:8.2-fpm-alpine
 RUN apk update && \
     apk add --no-cache nginx gettext
-RUN rm -f /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/conf.d/*.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf 
 COPY . /var/www/html
-COPY nginx.conf /etc/nginx/conf.d/nginx.conf
 RUN chown -R www-data:www-data /var/www/html
-CMD sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/nginx.conf > /etc/nginx/conf.d/default.conf && php-fpm -D && nginx -g 'daemon off;'"
+CMD sh -c "envsubst '\$PORT' < /etc/nginx/nginx.conf > /tmp/nginx-ready.conf && php-fpm -D && nginx -c /tmp/nginx-ready.conf -g 'daemon off;'"
